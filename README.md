@@ -38,3 +38,9 @@ Command-line use:
 You can do in-place replacement with
 
     jangle.py < document.txt | sponge document.txt
+
+# Bugs
+
+If a script block has more than one output-producing expression, the
+subsequent expressions will be misaligned. Script blocks should consist of
+optional definitions and a single output-emitting line at the end.

@@ -70,6 +70,13 @@ class Document:
         g = gensym()
         for (text, code) in self.data:
             lines.extend(code)
+            # A nasty hack to eat away the prompt lines
+            if lines[-1].strip() != ')':
+                # Last line isn't the end multiline declaration marker, so
+                # assume it's an expression that prints something. Add the
+                # empty echo before it to clean up prompt noise from any
+                # definition lines before the last one.
+                lines.insert(-1, "echo ''")
             lines.append(next(g))
         return '\n'.join(lines)
 
@@ -83,7 +90,16 @@ class Document:
             if parse_gensym(line):
                 output_chunks.append([])
             else:
-                line = '┆ ' + line.strip()
+                # The first output line will have the three input lines for
+                # the interactive prompt printed to it, these need to be
+                # removed.
+                #
+                # XXX: If the input chunk had multiple output-printing lines
+                # in it, multiple prompt prefixes will be printed, and Jangle
+                # isn't smart enough to remove the subsequent ones.
+                if not len(output_chunks[-1]) and line.startswith('   '):
+                    line = line[3:]
+                line = '┆ ' + line.rstrip()
                 output_chunks[-1].append('    '+line)
 
         for (i, (text, code)) in enumerate(self.data):
