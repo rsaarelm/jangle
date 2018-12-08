@@ -6,8 +6,8 @@ import subprocess
 # Indented 7 or more columns, must contain non-whitespace.
 CODE = re.compile(r'^\s{7}\s*\S')
 
-# Must have non-whitespace at indentation 4.
-OUTPUT = re.compile(r'^\s{4}\S')
+# Must have output marker at indentation 4
+OUTPUT = re.compile(r'^\s{4}┆ ')
 
 def gensym():
     n = 1
@@ -78,10 +78,12 @@ class Document:
         lines = []
         output_chunks = [[]]
         for line in script_output.splitlines():
-            line = line.strip()
+            if not line.strip():
+                continue
             if parse_gensym(line):
                 output_chunks.append([])
             else:
+                line = '┆ ' + line.strip()
                 output_chunks[-1].append('    '+line)
 
         for (i, (text, code)) in enumerate(self.data):
