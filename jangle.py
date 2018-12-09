@@ -8,7 +8,7 @@ import shutil
 CODE = re.compile(r'^\s{7}\S')
 
 # Must have output marker at indentation 4
-OUTPUT = re.compile(r'^\s{4}┆ ')
+OUTPUT = re.compile('^\\s{4,}\\S.*\u00A0$')
 
 def gensym():
     n = 1
@@ -111,7 +111,7 @@ class Document:
                 # isn't smart enough to remove the subsequent ones.
                 if not len(output_chunks[-1]) and line.startswith('   '):
                     line = line[3:]
-                line = '┆ ' + line.rstrip()
+                line = line.rstrip()+'\u00A0'
                 output_chunks[-1].append('    '+line)
 
         for (i, (text, code)) in enumerate(self.data):
