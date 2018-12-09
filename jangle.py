@@ -2,6 +2,7 @@
 import re
 import sys
 import subprocess
+import shutil
 
 # Indented 7 or more columns, must contain non-whitespace.
 CODE = re.compile(r'^\s{7}\S')
@@ -128,14 +129,20 @@ class Document:
         return '\n'.join(lines)
 
 
-def execute(source):
-    p = subprocess.Popen(
-            ('/usr/bin/env', 'jconsole'),
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE)
-    return str(p.communicate(bytes(source, 'utf-8'))[0], 'utf-8')
-
-
 if __name__=='__main__':
+    p = None
+    for name in ('ijconsole', 'jconsole'):
+        if shutil.which(name):
+            p = subprocess.Popen(
+                    ('/usr/bin/env', name),
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE)
+            break
+
+    if not p:
+        print("Couldn't find ijconsole or jconsole, please install a J programming language interpreter")
+        sys.exit(1)
+
     doc = Document(sys.stdin)
-    print(doc.weave(execute(doc.tangle())))
+    output = str(p.communicate(bytes(doc.tangle(), 'utf-8'))[0], 'utf-8')
+    print(doc.weave(output))
