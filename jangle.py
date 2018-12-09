@@ -4,7 +4,7 @@ import sys
 import subprocess
 
 # Indented 7 or more columns, must contain non-whitespace.
-CODE = re.compile(r'^\s{7}\s*\S')
+CODE = re.compile(r'^\s{7}\S')
 
 # Must have output marker at indentation 4
 OUTPUT = re.compile(r'^\s{4}┆ ')
@@ -32,9 +32,11 @@ class Document:
         self.data = []
 
         state = IN_TEXT
+        previous_line_prevents_code_mode = False
+
         for line in lines:
             if state == IN_TEXT:
-                if CODE.match(line):
+                if CODE.match(line) and not previous_line_prevents_code_mode:
                     state = IN_CODE
                     code = [line.rstrip()]
                 else:
@@ -60,6 +62,15 @@ class Document:
                     state = IN_TEXT
                     self.data.append((text, code))
                     text, code = [line.rstrip()], []
+
+            # Can't switch to code mode immediately after a non-empty,
+            # non-code, non-output line. This is to prevent accidental shifts
+            # to code mode in middle of some other verbatim text that includes
+            # a bit indented by 3 columns.
+            previous_line_prevents_code_mode = \
+                    state == IN_TEXT and \
+                    not OUTPUT.match(line) and \
+                    line.strip()
 
         if text or code:
             self.data.append((text, code))

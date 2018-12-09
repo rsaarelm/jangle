@@ -23,6 +23,14 @@ input:
     ┆ │5│0 5 10 15 20 25│
     ┆ └─┴───────────────┘
 
+To be parsed as a J expression, the line should be separated by empty lines.
+Regular blocks of verbatim text that happen to have a line indented 7 columns
+in the middle do not get converted:
+
+    # A non-notebook source code example
+    def func(a, b):
+       return a * b
+
 All consecutive non-whitespace lines indented at 4 columns and starting with
 the special marker character will be considered generated output and will be
 deleted at the next Jangle run.
