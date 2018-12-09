@@ -12,16 +12,6 @@ CODE = re.compile(r'^\s{7}\s*\S')
 # Must have output marker at indentation 4
 OUTPUT = re.compile('^\\s{4,}\\S.*\u00A0$')
 
-def gensym():
-    n = 1
-    while True:
-        yield "'__PARAGRAPH_BREAK_GENSYM_%s__'" % n
-        n += 1
-
-def parse_gensym(line):
-    # TODO: Should we do something with the number as well?
-    return '__PARAGRAPH_BREAK_GENSYM_' in line
-
 IN_TEXT = 0
 IN_CODE = 1
 IN_OUTPUT = 2
@@ -81,7 +71,6 @@ class Document:
     def tangle(self):
         """Produce executable J script."""
         lines = []
-        g = gensym()
         for (text, code) in self.data:
             lines.extend(code)
             # A nasty hack to eat away the prompt lines
@@ -91,7 +80,9 @@ class Document:
                 # empty echo before it to clean up prompt noise from any
                 # definition lines before the last one.
                 lines.insert(-1, "echo ''")
-            lines.append(next(g))
+            # Use the "Record Separator" symbol to mark block boundaries for
+            # weave
+            lines.append("echo '\u241E'")
         return '\n'.join(lines)
 
     def weave(self, script_output):
@@ -101,7 +92,7 @@ class Document:
         for line in script_output.splitlines():
             if not line.strip():
                 continue
-            if parse_gensym(line):
+            if '\u241E' in line:
                 output_chunks.append([])
             else:
                 # The first output line will have the three input lines for
