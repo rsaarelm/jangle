@@ -5,7 +5,9 @@ import subprocess
 import shutil
 
 # Indented 7 or more columns, must contain non-whitespace.
-CODE = re.compile(r'^\s{7}\S')
+# The code-starting line must be indented exactly 7 columns
+START_CODE = re.compile(r'^\s{7}\S')
+CODE = re.compile(r'^\s{7}\s*\S')
 
 # Must have output marker at indentation 4
 OUTPUT = re.compile('^\\s{4,}\\S.*\u00A0$')
@@ -37,7 +39,7 @@ class Document:
 
         for line in lines:
             if state == IN_TEXT:
-                if CODE.match(line) and not previous_line_prevents_code_mode:
+                if START_CODE.match(line) and not previous_line_prevents_code_mode:
                     state = IN_CODE
                     code = [line.rstrip()]
                 else:
@@ -55,7 +57,7 @@ class Document:
             else:
                 if OUTPUT.match(line):
                     continue
-                elif CODE.match(line):
+                elif START_CODE.match(line):
                     state = IN_CODE
                     self.data.append((text, code))
                     text, code = [], [line.rstrip()]
