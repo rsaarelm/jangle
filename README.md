@@ -50,5 +50,8 @@ You can do in-place replacement with
 # Bugs
 
 If a script block has more than one output-producing expression, the
-subsequent expressions will be misaligned. Script blocks should consist of
-optional definitions and a single output-emitting line at the end.
+subsequent expressions will be misaligned due to the J interpreter printing
+input prompt indentations to stdout when it's run. There is a workaround for
+this, but it only handles output emitted by the last line of a script block.
+Until this is fixed, script blocks need to be written so that only the last
+line emits output.
