@@ -74,7 +74,7 @@ class Document:
         for (text, code) in self.data:
             lines.extend(code)
             # A nasty hack to eat away the prompt lines
-            if lines[-1].strip() != ')':
+            if code and code[-1].strip() != ')':
                 # Last line isn't the end multiline declaration marker, so
                 # assume it's an expression that prints something. Add the
                 # empty echo before it to clean up prompt noise from any
